@@ -96,4 +96,10 @@ class PostsController extends Controller
 
     }
 
+    public function importPosts()
+    {
+
+
+    }
+
 }
