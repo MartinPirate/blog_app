@@ -65,12 +65,12 @@ class Post extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function scopeFilter($query)
+    public function scopeFilter($query, array $filters)
     {
-        $query->when($filters['search'] ?? null, function ($query, $search) {
-            $query->where('title', 'like', '%' . $search . '%');
+        $direction = $filters['direction'] ?? 'desc';
 
-        });
+        $query->orderBy('publishedAt', $direction);
+
     }
 
     public function getShortDescriptionAttribute(): string

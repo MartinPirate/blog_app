@@ -1,38 +1,59 @@
-<script setup>
+<script>
 import {Head, Link} from '@inertiajs/vue3';
 import Posts from "../Components/Posts.vue";
+import throttle from "lodash/throttle";
+import pickBy from "lodash/pickBy";
+import PostsNotFound from "../Components/PostsNotFound.vue";
+import mapValues from "lodash/mapValues";
 
-const props = defineProps({
-    canLogin: Boolean,
-    canRegister: Boolean,
-    laravelVersion: String,
-    phpVersion: String,
-    posts: Object
-});
+
+export default {
+    components: {
+        PostsNotFound,
+        Head,
+        Link,
+        Posts,
+    },
+    data() {
+        return {
+            form: {
+                sortBy: "publication_date",
+                direction: this.filters.direction ?? 'desc',
+            },
+        }
+    },
+
+    props: {
+        canLogin: Boolean,
+        canRegister: Boolean,
+        laravelVersion: String,
+        phpVersion: String,
+        posts: Object,
+        filters: Object
+    },
+
+    watch: {
+        form: {
+            deep: true,
+            handler: throttle(function () {
+                this.$inertia.get('/', pickBy(this.form), {preserveState: true})
+            }, 150),
+        },
+    },
+
+    methods: {
+        reset() {
+            this.form = mapValues(this.form, () => null)
+        },
+    },
+
+}
+
 
 </script>
 
 <template>
     <Head><title>Welcome</title></Head>
-
-    <!--    <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0">
-            <div v-if="canLogin" class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                <Link v-if="$page.props.user" :href="route('dashboard')"
-                      class="text-sm text-gray-700 dark:text-gray-500 underline">Dashboard
-                </Link>
-
-                <template v-else>
-                    <Link :href="route('login')" class="text-sm text-gray-700 dark:text-gray-500 underline">Log in</Link>
-
-                    <Link v-if="canRegister" :href="route('register')"
-                          class="ml-4 text-sm text-gray-700 dark:text-gray-500 underline">Register
-                    </Link>
-                </template>
-            </div>
-
-            <posts/>
-        </div>-->
-
     <div class="relative bg-white">
         <div class="mx-auto max-w-7xl px-6">
             <div v-if="canLogin"
@@ -55,6 +76,32 @@ const props = defineProps({
                         </svg>
                     </button>
                 </div>
+
+
+                <div class="flex items-center">
+                    <label for="price" class="block text-sm font-medium text-gray-700"></label>
+                    <div class="relative mt-1 rounded-md shadow-sm">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <span class="text-gray-500 sm:text-sm">sort by Published Date</span>
+                        </div>
+                        <input type="text" name="publicationDate" id="sort" readonly
+                               class="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                        <div class="absolute inset-y-0 right-0 flex items-center">
+                            <select id="direction" name="direction" v-model="form.direction"
+                                    class="h-full rounded-md border-transparent bg-transparent py-0 pl-2 pr-7 text-gray-500 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                <option value="asc">ASC</option>
+                                <option value="desc">DESC</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <button class="ml-3 text-gray-500 hover:text-gray-700 focus:text-indigo-500 text-sm" type="button"
+                            @click="reset">Reset
+                    </button>
+                </div>
+
+
                 <nav class="hidden space-x-10 md:flex">
 
 
@@ -62,6 +109,7 @@ const props = defineProps({
                           class="ttext-base font-medium text-gray-500 hover:text-gray-900">Dashboard
                     </Link>
                 </nav>
+
                 <div class="hidden items-center justify-end md:flex md:flex-1 lg:w-0">
 
                     <Link :href="route('login')"
@@ -77,8 +125,11 @@ const props = defineProps({
                 </div>
             </div>
 
-            <div class="mt-4">
-                <posts :posts="props.posts"/>
+            <div class="mt-4" v-if="posts.data.length !==0">
+                <posts :posts="posts"/>
+            </div>
+            <div v-else>
+                <PostsNotFound/>
             </div>
 
 
