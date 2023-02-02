@@ -7,8 +7,10 @@ use Database\Factories\PostFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * App\Models\Post
@@ -53,4 +55,31 @@ class Post extends Model
     protected $casts = [
         'publishedAt' => 'datetime'
     ];
+
+    /**
+     * User-Posts relationship
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function scopeFilter($query)
+    {
+        $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->where('title', 'like', '%' . $search . '%');
+
+        });
+    }
+
+    public function getShortDescriptionAttribute(): string
+    {
+
+        if (Str::words($this->description) < 25) {
+            return $this->description;
+        }
+
+        return Str::words($this->description, 25, '...');
+    }
 }
