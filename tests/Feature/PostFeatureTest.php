@@ -4,9 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Post;
 use App\Models\User;
-use Database\Factories\PostFactory;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 class PostFeatureTest extends TestCase
@@ -79,7 +76,33 @@ class PostFeatureTest extends TestCase
             ->assertSee($post->description);
     }
 
-    public function test_other_users_posts_are_not_found_on_the_dashboard()
+
+    /**
+     *
+     * test can load the post details page
+     * @return void
+     */
+    public function test_post_details_can_be_found(): void
+    {
+        $user = User::factory()->create();
+        $post = Post::factory()->create([
+            'user_id' => $user->id,
+        ]);
+        $response = $this->get('posts/'. $post->id);
+        $response->assertStatus(200)
+            ->assertSee($post->title)
+            ->assertSee($post->description);
+
+
+    }
+
+    /**
+     * tests users can only see their posts on the dashboard
+     *
+     * @return void
+     */
+
+    public function test_other_users_posts_are_not_found_on_the_dashboard(): void
     {
         $user = User::factory()->create();
         $user2 = User::factory()->create();
@@ -96,7 +119,11 @@ class PostFeatureTest extends TestCase
 
     }
 
-    public function test_authenticated_user_can_save_a_valid_post()
+    /**
+     * Test a user can a create a post
+     * @return void
+     */
+    public function test_authenticated_user_can_save_a_valid_post(): void
     {
 
 
@@ -115,7 +142,11 @@ class PostFeatureTest extends TestCase
 
     }
 
-    public function test_guests_can_not_save_post()
+    /**
+     * test Guests can not save a post
+     * @return void
+     */
+    public function test_guests_can_not_save_post(): void
     {
         $post = [
             'title' => 'This is a post title',
@@ -128,6 +159,10 @@ class PostFeatureTest extends TestCase
 
     }
 
+    /**
+     * Test all fields are required
+     * @return void
+     */
     public function test_all_fields_are_required()
     {
 
