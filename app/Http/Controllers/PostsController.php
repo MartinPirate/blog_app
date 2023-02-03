@@ -7,8 +7,8 @@ use App\Http\Requests\PostRequest;
 use App\Models\Post;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,17 +17,21 @@ class PostsController extends Controller
 {
     public function welcome(PostFilterRequest $request): Response
     {
-        $posts = Post::with('user')
-            ->filter($request->only('sortBy', 'direction'))
-            ->paginate(10)
-            ->withQueryString()
-            ->through(fn($post) => [
-                'id' => $post->id,
-                'title' => $post->title,
-                'description' => $post->description,
-                'author' => $post->user->name,
-                'published_date' => $post->publishedAt->format('d M Y'),
-            ]);
+
+        $posts = cache()->tags('posts')->remember('posts-asc', 60 * 60, function () use ($request) {
+            return Post::with('user')
+                ->filter($request->only('sortBy', 'direction'))
+                ->paginate(10)
+                ->withQueryString()
+                ->through(fn($post) => [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'description' => $post->description,
+                    'author' => $post->user->name,
+                    'published_date' => $post->publishedAt->format('d M Y'),
+                ]);
+        });
+
 
         return Inertia::render('Welcome', [
             'canLogin' => Route::has('login'),
@@ -89,6 +93,8 @@ class PostsController extends Controller
         $post->publishedAt = $request->publishedAt;
         $post->user_id = $user->id;
         $post->save();
+
+        Cache::tags('posts')->flush();
 
         return redirect('dashboard')->with('success', 'post added successfully');
 

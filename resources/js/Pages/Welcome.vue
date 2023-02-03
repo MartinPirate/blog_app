@@ -5,10 +5,12 @@ import throttle from "lodash/throttle";
 import pickBy from "lodash/pickBy";
 import PostsNotFound from "../Components/PostsNotFound.vue";
 import mapValues from "lodash/mapValues";
+import ApplicationLogo from "../Components/ApplicationLogo.vue";
 
 
 export default {
     components: {
+        ApplicationLogo,
         PostsNotFound,
         Head,
         Link,
@@ -61,8 +63,7 @@ export default {
                 <div class="flex justify-start lg:w-0 lg:flex-1">
                     <a href="#">
                         <span class="sr-only">Logo</span>
-                        <img class="h-8 w-auto sm:h-10"
-                             src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600" alt="">
+                        <ApplicationLogo/>
                     </a>
                 </div>
                 <div class="-my-2 -mr-2 md:hidden">

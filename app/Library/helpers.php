@@ -2,6 +2,7 @@
 
 use App\Models\Post;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -34,8 +35,8 @@ if (!function_exists('importPosts')) {
                 $new_post->description = $post['description'];
                 $new_post->publishedAt = $post['publishedAt'];
                 $new_post->save();
-
             }
+            Cache::tags('posts')->flush();
 
         } catch (Throwable $exception) {
             Log::error($exception->getMessage());
