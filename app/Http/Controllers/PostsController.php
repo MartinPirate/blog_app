@@ -35,8 +35,9 @@ class PostsController extends Controller
      */
     public function welcome(PostFilterRequest $request): Response
     {
+        $filterInputsHash = md5(serialize($request->only('sortBy', 'direction')));
 
-        $posts = cache()->tags('posts')->remember('posts-asc', 60 * 60, function () use ($request) {
+        $posts = cache()->tags('posts')->remember($filterInputsHash, 60 * 60, function () use ($request) {
             return Post::with('user')
                 ->filter($request->only('sortBy', 'direction'))
                 ->paginate(10)

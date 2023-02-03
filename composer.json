@@ -15,9 +15,10 @@
         "laravel/jetstream": "^2.16",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
+        "predis/predis": "^2.1",
         "santigarcor/laratrust": "^7.1",
-        "tightenco/ziggy": "^1.0",
-        "spatie/laravel-fractal": "^6.0"
+        "spatie/laravel-fractal": "^6.0",
+        "tightenco/ziggy": "^1.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.12",
