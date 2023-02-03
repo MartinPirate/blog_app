@@ -3,6 +3,7 @@
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Log;
 
 if (!function_exists('importPosts')) {
 
-    function importPosts(): string
+    function importPosts(): void
     {
 
         //todo move this to the .env or config file
@@ -22,7 +23,7 @@ if (!function_exists('importPosts')) {
         if (!$admin) {
             abort(403, 'Unauthorized action.');
         }
-
+        DB::beginTransaction();
         try {
             $data = Http::get('https://candidate-test.sq1.io/api.php');    //todo move this to the .env or config file
 
@@ -36,10 +37,12 @@ if (!function_exists('importPosts')) {
                 $new_post->publishedAt = $post['publishedAt'];
                 $new_post->save();
             }
-            Cache::tags('posts')->flush();
+            DB::commit();
+            Cache::forget('posts');
 
         } catch (Throwable $exception) {
             Log::error($exception->getMessage());
+            DB::rollback();
         }
 
 

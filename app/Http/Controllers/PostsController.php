@@ -9,9 +9,12 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use TheSeer\Tokenizer\Exception;
 
 class PostsController extends Controller
 {
@@ -86,17 +89,29 @@ class PostsController extends Controller
         //find if post exist by combining datetime and title
 
         //save the post
+        DB::beginTransaction();
 
-        $post = new Post();
-        $post->title = $request->title;
-        $post->description = $request->description;
-        $post->publishedAt = $request->publishedAt;
-        $post->user_id = $user->id;
-        $post->save();
+        try {
+            $post = new Post();
+            $post->title = $request->title;
+            $post->description = $request->description;
+            $post->publishedAt = $request->publishedAt;
+            $post->user_id = $user->id;
+            $post->save();
 
-        Cache::tags('posts')->flush();
+            DB::commit();
 
-        return redirect('dashboard')->with('success', 'post added successfully');
+            Cache::forget('posts');
+        } catch (\Throwable $exception) {
+            Log::error($exception->getMessage());
+
+            DB::rollback();
+
+            return redirect()->back()->withInput()->with('error', trans('message.failed'));
+        }
+
+
+        return redirect('dashboard')->with('success', trans('messages.success_store'));
 
     }
 

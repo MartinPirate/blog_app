@@ -29,6 +29,6 @@ class importPostCommand extends Command
     {
 
         importPosts();
-        $this->info('Posts were imported successfully!');
+        $this->info(trans('messages.success_import'));
     }
 }
