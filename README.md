@@ -34,10 +34,10 @@ build assets
 npm run dev
 ```
 
-After installing composer packages, create `.env` by copying `.env.example` file.
+Create the  `.env` file by copying `.env.example` file.
 
 ```bash
-cd blog-app
+cd blog_app
 cp .env.example .env
 ```
 
@@ -84,7 +84,7 @@ To test the Posts import from (https://candidate-test.sq1.io/api.php`) endpoint,
 php artisan posts:import
 ```
 
-# Unit Testing
+## Unit Testing
 
 To run the tests simple run following command from the root directory.
 
