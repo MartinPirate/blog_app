@@ -57,8 +57,8 @@ class UsersTableSeeder extends Seeder
 
     {
         $userRole = Role::whereName('user')->first();
-        $users = User::factory(10)
-            ->has(Post::factory(10))
+        $users = User::factory(3)
+            ->has(Post::factory(3))
             ->create();
 
         $users->each(function ($user) use ($userRole) {

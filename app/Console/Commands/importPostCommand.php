@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Service\PostService;
 use Illuminate\Console\Command;
 
 class importPostCommand extends Command
@@ -28,7 +29,10 @@ class importPostCommand extends Command
     public function handle()
     {
 
-        importPosts();
+        //  importPosts();
+
+        $posts = PostService::saveImports();
+
         $this->info(trans('messages.success_import'));
     }
 }

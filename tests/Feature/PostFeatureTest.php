@@ -3,7 +3,14 @@
 namespace Tests\Feature;
 
 use App\Models\Post;
+use App\Models\Role;
 use App\Models\User;
+use App\Repositories\EndPointsRepository;
+use App\Service\PostService;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class PostFeatureTest extends TestCase
@@ -88,7 +95,7 @@ class PostFeatureTest extends TestCase
         $post = Post::factory()->create([
             'user_id' => $user->id,
         ]);
-        $response = $this->get('posts/'. $post->id);
+        $response = $this->get('posts/' . $post->id);
         $response->assertStatus(200)
             ->assertSee($post->title)
             ->assertSee($post->description);
@@ -163,7 +170,7 @@ class PostFeatureTest extends TestCase
      * Test all fields are required
      * @return void
      */
-    public function test_all_fields_are_required()
+    public function test_all_fields_are_required(): void
     {
 
         $user = User::factory()->create();
@@ -185,6 +192,42 @@ class PostFeatureTest extends TestCase
 
         $response->assertSee('The title field is required.');
 
+    }
+
+    /**
+     * test admin user can fetch posts
+     * @return void
+     */
+    public function test_fetch_posts_endpoint(): void
+    {
+
+        $adminRole = Role::factory()->create([
+            'name' => 'admin'
+        ]);
+        $user = User::factory()->create();
+        $user->attachRole($adminRole);
+
+        $this->actingAs($user);
+
+        {
+            $response = [
+                'articles' => [
+                    [
+                        "id" => 11,
+                        "title" => "Body of mother-of-one, 32, killed in 100mph A40 crash was found in car park of Tesla garage",
+                        "description" => "A criminal investigation has been launched into the A40 horror crash which claimed the life of beautician Yagmur Ozden. She died from multiple traumatic injuries following the accident.",
+                        "publishedAt" => "2022-08-31T10:02:35Z"
+                    ]
+                ]
+            ];
+            Http::fake([
+                EndPointsRepository::getArticlesUrl() => Http::response($response)
+            ]);
+
+            $result = PostService::fetch();
+
+            $this->assertEquals($response['articles'], $result);
+        }
     }
 
 
