@@ -127,7 +127,7 @@ export default {
             </div>
 
             <div class="mt-4" v-if="posts.data.length !==0">
-                <posts :posts="posts"/>
+                <posts :posts="posts" :show_info_button="true"  />
             </div>
             <div v-else>
                 <PostsNotFound/>

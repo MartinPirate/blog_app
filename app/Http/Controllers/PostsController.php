@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PostFilterRequest;
 use App\Http\Requests\PostRequest;
 use App\Models\Post;
+use App\Transformers\PostTransformer;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Routing\Redirector;
@@ -18,6 +19,20 @@ use TheSeer\Tokenizer\Exception;
 
 class PostsController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('auth:sanctum', ['except' => [
+            'welcome', 'show',
+        ]]);
+    }
+
+
+    /**
+     * Get Posts for the welcome page
+     * @param PostFilterRequest $request
+     * @return Response
+     */
     public function welcome(PostFilterRequest $request): Response
     {
 
@@ -43,6 +58,11 @@ class PostsController extends Controller
             'posts' => $posts]);
     }
 
+    /**
+     * Get Posts for the admin page
+     * @param PostFilterRequest $request
+     * @return Response
+     */
     public function index(PostFilterRequest $request): Response
     {
 
@@ -70,9 +90,34 @@ class PostsController extends Controller
 
     }
 
+    /**
+     * Create a post page
+     * @return Response
+     */
     public function create(): Response
     {
         return Inertia::render('Post/Create');
+    }
+
+    /**
+     *Show post Details
+     * @param Post $post
+     * @return Response
+     */
+    public function show(Post $post): Response
+    {
+        $post = [
+            'id' => $post->id,
+            'title' => $post->title,
+            'description' => $post->description,
+            'author' => $post->user->name,
+            'published_date' => $post->publishedAt->format('d M Y'),
+        ];
+
+        return Inertia::render('Post/Show', [
+            'post' => $post
+        ]);
+
     }
 
     /**
@@ -86,9 +131,8 @@ class PostsController extends Controller
         if (!$user) {
             abort(403, "no authenticated User Found");
         }
-        //find if post exist by combining datetime and title
+        //todo find if post exist by combining datetime and title
 
-        //save the post
         DB::beginTransaction();
 
         try {
@@ -112,7 +156,6 @@ class PostsController extends Controller
 
 
         return redirect('dashboard')->with('success', trans('messages.success_store'));
-
     }
 
 

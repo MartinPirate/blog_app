@@ -20,8 +20,8 @@ class PostTransformer extends TransformerAbstract
             'id' => $post->id,
             'title' => $post->title,
             'description' => $post->description,
-         /*   'date' => getMonthAndDate($post->publishedAt),
-            'time' => getTime($post->publishedAt),*/
+            'author' => $post->user->name,
+            'published_date' => $post->publishedAt->format('d M Y'),
         ];
     }
 

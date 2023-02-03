@@ -12,11 +12,10 @@ console.log(props.posts)
 <template>
 
     <div v-for="post in props.posts.data">
-        <post :post="post"></post>
+        <post :post="post" :show_info_button="true"></post>
     </div>
 
     <pagination class="mt-6" :links="props.posts.links"/>
-
 
 
 </template>
